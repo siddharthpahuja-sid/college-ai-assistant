@@ -7,9 +7,9 @@ from Modules.vector_score import create_index, search_similar
 from Modules.llm import generate_answer
 
 
-# =========================================================
+
 # PAGE CONFIG
-# =========================================================
+
 
 st.set_page_config(
     page_title="College AI Assistant",
@@ -29,9 +29,9 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 
-# =========================================================
+
 # THEME COLORS
-# =========================================================
+
 
 if st.session_state.dark_mode:
 
@@ -54,17 +54,17 @@ else:
     accent = "#4F46E5"
 
 
-# =========================================================
+
 # CUSTOM CSS
-# =========================================================
+
 
 st.markdown(
     f"""
     <style>
 
-    /* =====================================================
+    /* 
        HIDE STREAMLIT TOP BAR
-       ===================================================== */
+ */
 
     [data-testid="stHeader"] {{
         display: none;
@@ -79,9 +79,9 @@ st.markdown(
     }}
 
 
-    /* =====================================================
+    /*
        MAIN BACKGROUND
-       ===================================================== */
+     */
 
     .stApp {{
         background-color: {background};
@@ -95,9 +95,9 @@ st.markdown(
     }}
 
 
-    /* =====================================================
+    /*
        SIDEBAR
-       ===================================================== */
+      */
 
     [data-testid="stSidebar"] {{
         background-color: {sidebar};
@@ -109,9 +109,9 @@ st.markdown(
     }}
 
 
-    /* =====================================================
+    /*
        BUTTONS
-       ===================================================== */
+    */
 
     .stButton > button {{
         width: 100%;
@@ -131,18 +131,18 @@ st.markdown(
     }}
 
 
-    /* =====================================================
+    /* 
        CHAT INPUT
-       ===================================================== */
+       */
 
     [data-testid="stChatInput"] {{
         border-radius: 14px;
     }}
 
 
-    /* =====================================================
+    /* =
        CHAT MESSAGE TEXT
-       ===================================================== */
+       */
 
     [data-testid="stChatMessage"] p {{
         color: {text} !important;
@@ -161,9 +161,9 @@ st.markdown(
     }}
 
 
-    /* =====================================================
+    /* 
        DIVIDER
-       ===================================================== */
+ */
 
     hr {{
         border-color: {border};
@@ -175,9 +175,8 @@ st.markdown(
 )
 
 
-# =========================================================
+
 # SIDEBAR
-# =========================================================
 
 with st.sidebar:
 
@@ -190,9 +189,9 @@ with st.sidebar:
     st.divider()
 
 
-    # =====================================================
+
     # NEW CHAT
-    # =====================================================
+   
 
     if st.button(
         "🆕 New Chat",
@@ -207,9 +206,8 @@ with st.sidebar:
     st.divider()
 
 
-    # =====================================================
     # APPEARANCE
-    # =====================================================
+
 
     st.markdown("### ⚙️ Appearance")
 
@@ -228,9 +226,9 @@ with st.sidebar:
     st.divider()
 
 
-    # =====================================================
+ 
     # FEATURES
-    # =====================================================
+
 
     st.markdown("### ✨ Features")
 
@@ -255,9 +253,9 @@ with st.sidebar:
     )
 
 
-# =========================================================
+
 # MAIN HEADER
-# =========================================================
+
 
 st.markdown(
     f"""
@@ -311,23 +309,23 @@ st.markdown(
 st.divider()
 
 
-# =========================================================
-# LOAD COLLEGE DATA
-# =========================================================
 
-@st.cache_resource
+# LOAD COLLEGE DATA
+
+@st.cache_resource(show_spinner="Loading college document...")
 def load_college_data():
 
     pdf_path = "Data/college.pdf"
 
     with open(pdf_path, "rb") as pdf_file:
-
         text = extract_text(pdf_file)
 
     chunks = create_chunks(text)
 
+    # Generate embeddings in batches
     embeddings = create_embeddings(chunks)
 
+    # Create FAISS index
     index = create_index(embeddings)
 
     return chunks, index
@@ -336,9 +334,8 @@ def load_college_data():
 chunks, index = load_college_data()
 
 
-# =========================================================
 # DOCUMENT STATUS
-# =========================================================
+
 
 # st.success("🟢 College Document Ready")
 
@@ -348,9 +345,9 @@ chunks, index = load_college_data()
 # )
 
 
-# =========================================================
+
 # WELCOME MESSAGE
-# =========================================================
+
 
 # if len(st.session_state.messages) == 0:
 
@@ -364,9 +361,9 @@ chunks, index = load_college_data()
 #     )
 
 
-# =========================================================
+
 # SUGGESTED QUESTIONS
-# =========================================================
+
 
 selected_question = None
 
@@ -422,9 +419,8 @@ if len(st.session_state.messages) == 0:
             )
 
 
-# =========================================================
+
 # DISPLAY CHAT HISTORY
-# =========================================================
 
 for message in st.session_state.messages:
 
@@ -433,9 +429,9 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 
-# =========================================================
+
 # CHAT INPUT
-# =========================================================
+
 
 typed_question = st.chat_input(
     "Ask something about the college..."
@@ -449,15 +445,14 @@ question = (
 )
 
 
-# =========================================================
 # PROCESS QUESTION
-# =========================================================
+
 
 if question:
 
-    # -----------------------------------------------------
+
     # USER MESSAGE
-    # -----------------------------------------------------
+
 
     with st.chat_message("user"):
 
@@ -471,18 +466,18 @@ if question:
     )
 
 
-    # -----------------------------------------------------
+   
     # CREATE QUERY EMBEDDING
-    # -----------------------------------------------------
+
 
     query_vector = embedding_model.embed_query(
         question
     )
 
 
-    # -----------------------------------------------------
+  
     # SEARCH RELEVANT CHUNKS
-    # -----------------------------------------------------
+  
 
     results = search_similar(
         query_vector,
@@ -491,16 +486,16 @@ if question:
     )
 
 
-    # -----------------------------------------------------
+   
     # CREATE CONTEXT
-    # -----------------------------------------------------
+
 
     context = "\n\n".join(results)
 
 
-    # -----------------------------------------------------
+
     # GENERATE AI ANSWER
-    # -----------------------------------------------------
+  
 
     with st.chat_message("assistant"):
 
@@ -514,9 +509,9 @@ if question:
         st.write(answer)
 
 
-    # -----------------------------------------------------
+
     # SAVE ASSISTANT ANSWER
-    # -----------------------------------------------------
+ 
 
     st.session_state.messages.append(
         {
@@ -526,9 +521,9 @@ if question:
     )
 
 
-# =========================================================
+
 # FOOTER
-# =========================================================
+
 
 st.divider()
 
