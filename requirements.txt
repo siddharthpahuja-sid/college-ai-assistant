@@ -4,3 +4,4 @@ langchain-google-genai
 python-dotenv
 faiss-cpu
 numpy
+langchain-text-splitters
